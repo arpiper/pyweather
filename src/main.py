@@ -3,11 +3,16 @@ import os
 import argparse
 import requests
 
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 # set path to the local directory
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from weather import OpenWeatherMap
 from weather import CityWeather
+from window import WeatherWindow
 import config 
 
 def main(args):
@@ -20,7 +25,14 @@ def main(args):
         units = args['units']
     api = OpenWeatherMap(key=config.KEY, city=city, units=units)
     w = CityWeather(city=city, api=api)
-    w.getCurrentWeather()
+    cw = w.getCurrentWeather()
+    f = w.getForecast()
+    win = WeatherWindow(title=f"{f['city']['name']} Weather Forecast")
+    # mvoed thses two lines into window class.
+    #win.connect('destroy', Gtk.main_quit)
+    win.setData(current=cw, forecast=f)
+    win.show_all()
+    Gtk.main()
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()

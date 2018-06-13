@@ -12,11 +12,10 @@ class CityWeather:
         self.api = api
 
     def getForecast(self):
-        print(self.api.forecast())
+        return self.api.getForecast()
 
     def getCurrentWeather(self):
-        data = self.api.getWeather()
-        print(data.json())
+        return self.api.getWeather()
 
 
 class OpenWeatherMap:
@@ -55,7 +54,33 @@ class OpenWeatherMap:
         return f'{self.base}forecast?{q}&mode={self.mode}&units={self.units}&{self.APPID}'
 
     def getWeather(self):
-        data = requests.get(self.weather())
+        res = requests.get(self.weather())
+        data = {}
+        for key,value in res.json().items():
+            if key in ['weather', 'main', 'id', 'wind', 'name', 'coord',]:
+                data[key] = value
         return data
 
     def getForecast(self):
+        res = requests.get(self.forecast()).json()
+        data = {
+            'city': res['city'],
+            'days': {},
+        }
+        for hour in res['list']:
+            day = hour['dt_txt'].split(' ')[0].split('-')[2]
+            if day in data['days'].keys():
+                if data['days'][day]['high'] < hour['main']['temp_max']:
+                    data['days'][day]['high'] = hour['main']['temp_max']
+                if data['days'][day]['low'] > hour['main']['temp_min']:
+                    data['days'][day]['low'] = hour['main']['temp_min']
+            else:
+                data['days'][day] = {
+                    'high': hour['main']['temp_max'],
+                    'low': hour['main']['temp_min'],
+                    'humidity': hour['main']['humidity'],
+                    'pressure': hour['main']['pressure'],
+                    'conditions': hour['weather'][0],
+                    'date': hour['dt_txt'],
+                }
+        return data
