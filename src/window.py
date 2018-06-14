@@ -1,4 +1,5 @@
 import datetime
+from subprocess import run, Popen, check_output, PIPE, STDOUT
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -50,3 +51,40 @@ class WeatherWindow(Gtk.Window):
         d = datetime.datetime.strptime(data['date'].split(' ')[0], '%Y-%m-%d')
         date = f"<span font='{self.FSize}'>{d.strftime('%A, %b %d')}</span>"
         return f"{date}\n{temps}\n{conditions}\n"
+
+class WeatherPopup():
+    font_size = 8
+    width = 250
+    height = 100
+    position = [540, 20]
+    text = ''
+    fg = '#fefefe'
+    bg = '#424242'
+
+    def __init__(self, text, *args, **kwargs):
+        self.text = text
+        if 'width' in kwargs.keys():
+            self.width = kwargs['width']
+        if 'height' in kwargs.keys():
+            self.height = kwargs['height']
+        if 'font_size' in kwargs.keys():
+            self.font_size = kwargs['font_size']
+
+    def open(self):
+        cmd = [
+            'dzen2',
+            '-x', f'{self.position[0]}',
+            '-y', f'{self.position[1]}',
+            #'-w', f'{self.width}',
+            #'-h', f'{self.height}',
+            '-e', 'button1=exit',
+            '-p',
+            '-fg', self.fg,
+            '-bg', self.bg,
+        ]
+        e = Popen(['echo', self.text], stdout=PIPE, universal_newlines=True, encoding='utf-8')
+        d = Popen(cmd, stdin=e.stdout, stderr=STDOUT)
+        e.stdout.close()
+        t = d.communicate()[0]
+        #run(['echo', f'{self.text}'])
+

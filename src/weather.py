@@ -1,21 +1,66 @@
 import requests
 import sys
+import datetime
+
+DEG = u'\N{DEGREE SIGN}'
 
 class CityWeather:
     city = None
     temp = None
     api = None
+    weather = None
     forecast = []
+    sunrise = 0
+    sunset = 0
+    units = 'F'
 
-    def __init__(self, city, api):
+    def __init__(self, city, api, **kwargs):
         self.city = city
         self.api = api
+        self.updateForecast()
+        self.updateCurrentWeather()
+        if 'units' in kwargs.keys():
+            if kwargs['units'] == 'metric':
+                self.units = 'C'
+
 
     def getForecast(self):
-        return self.api.getForecast()
+        return self.forecast
 
     def getCurrentWeather(self):
-        return self.api.getWeather()
+        return self.weather
+
+    def updateForecast(self):
+        forecast = self.api.getForecast()
+        if len(forecast['days']) > 0:
+            self.forecast = forecast
+
+    def updateCurrentWeather(self):
+        weather = self.api.getWeather()
+        if len(weather) > 0:
+            self.weather = weather
+            self.temp = f"{int(weather['main']['temp'])}{DEG} {self.units}"
+            s = datetime.datetime.fromtimestamp(weather['sys']['sunrise'])
+            self.sunrise = f'{s.hour}:{s.minute}'
+            if s.minute < 10:
+                self.sunrise = f'{s.hour}:0{s.minute}'
+            s = datetime.datetime.fromtimestamp(weather['sys']['sunset'])
+            self.sunset = f'{s.hour}:{s.minute}'
+            if s.minute < 10:
+                self.sunset = f'{s.hour}:0{s.minute}'
+
+    def updateData(self):
+        self.updateForecast()
+        self.updateCurrentWeather()
+
+    def formatWeather(self):
+        d = datetime.datetime.now()
+        date = f"{self.city}{d.strftime('%A, %B %d')}"
+        temps = f"{self.temp}"
+        return f"{date}{temps}"
+
+    def formatForecast(self):
+        pass
 
 
 class OpenWeatherMap:
@@ -57,7 +102,7 @@ class OpenWeatherMap:
         res = requests.get(self.weather())
         data = {}
         for key,value in res.json().items():
-            if key in ['weather', 'main', 'id', 'wind', 'name', 'coord',]:
+            if key in ['weather', 'main', 'id', 'wind', 'name', 'coord', 'sys']:
                 data[key] = value
         return data
 
