@@ -6,7 +6,8 @@ from gi.repository import Gtk, Gdk
 DEG = u'\N{DEGREE SIGN}'
 
 class WeatherWindow(Gtk.Window):
-    
+    FSize = 8
+    WSize = 24
     
     def __init__(self, title='hello'):
         super().__init__(title=title)
