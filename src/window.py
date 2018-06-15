@@ -53,16 +53,20 @@ class WeatherWindow(Gtk.Window):
         return f"{date}\n{temps}\n{conditions}\n"
 
 class WeatherPopup():
-    font_size = 8
-    width = 250
-    height = 100
-    position = [540, 20]
+    font_size = 10 
+    width = 500
+    line_height = 400
+    position = [710, 50]
     text = ''
     fg = '#fefefe'
     bg = '#424242'
+    lines = 2
+    title = ''
 
-    def __init__(self, text, *args, **kwargs):
+    def __init__(self, title, text, *args, **kwargs):
+        self.title = title
         self.text = text
+        self.lines = len(text.split('\n'))
         if 'width' in kwargs.keys():
             self.width = kwargs['width']
         if 'height' in kwargs.keys():
@@ -73,16 +77,19 @@ class WeatherPopup():
     def open(self):
         cmd = [
             'dzen2',
+            '-fn', f'Titillium-Light:pixelsize={self.font_size}',
             '-x', f'{self.position[0]}',
             '-y', f'{self.position[1]}',
-            #'-w', f'{self.width}',
-            #'-h', f'{self.height}',
-            '-e', 'button1=exit',
+            '-w', f'{self.width}',
+            '-h', f'{self.line_height}',
+            '-e', 'button1=exit;onstart=uncollapse',
             '-p',
-            '-fg', self.fg,
-            '-bg', self.bg,
+            '-l', '4',
+            #'-fg', self.fg,
+            #'-bg', self.bg,
         ]
-        e = Popen(['echo', self.text], stdout=PIPE, universal_newlines=True, encoding='utf-8')
+        print(self.text)
+        e = Popen(['echo', f'{self.title}', f'{self.text}'], stdout=PIPE, universal_newlines=True, encoding='utf-8')
         d = Popen(cmd, stdin=e.stdout, stderr=STDOUT)
         e.stdout.close()
         t = d.communicate()[0]

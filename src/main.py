@@ -38,11 +38,9 @@ def main(args):
         Gtk.main()
     else:
         cw = w.getCurrentWeather()
-        if (units == 'metric'):
-            print(f"{w.temp} C - {w.sunset}")
-        else:
-            print(f"{w.temp} F")
-        pu = WeatherPopup(w.formatWeather())
+        print(f"{w.temp} - {w.sunset}")
+        title = '^pa(;-150)Weather Forecast'
+        pu = WeatherPopup(f'{title}',f'{w.formatWeather()} {w.formatForecast()}')
         pu.open()
 
 

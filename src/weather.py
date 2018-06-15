@@ -9,19 +9,21 @@ class CityWeather:
     temp = None
     api = None
     weather = None
-    forecast = []
+    forecast = {}
     sunrise = 0
     sunset = 0
     units = 'F'
 
     def __init__(self, city, api, **kwargs):
+        # set variables
         self.city = city
         self.api = api
-        self.updateForecast()
-        self.updateCurrentWeather()
         if 'units' in kwargs.keys():
             if kwargs['units'] == 'metric':
                 self.units = 'C'
+        # get the weather info from the given api.
+        self.updateForecast()
+        self.updateCurrentWeather()
 
 
     def getForecast(self):
@@ -53,14 +55,24 @@ class CityWeather:
         self.updateForecast()
         self.updateCurrentWeather()
 
-    def formatWeather(self):
+    def formatWeather(self, output='dzen'):
         d = datetime.datetime.now()
-        date = f"{self.city}{d.strftime('%A, %B %d')}"
-        temps = f"{self.temp}"
+        date = f"^pa(+50;+200){self.city}{d:%A, %B %d}"
+        temps = f"^pa(+75;+500){self.temp}"
         return f"{date}{temps}"
 
-    def formatForecast(self):
-        pass
+    def formatForecast(self, output='dzen'):
+        strings = []
+        i = 0
+        for key,day in self.forecast['days'].items():
+            d = datetime.datetime.strptime(day['date'], '%Y-%m-%d')
+            line = f"^pa(+250;+{50 + i*10}){d:%A, %b %d}" \
+                f"^pa(+250;+{60 + i*10})High: {day['high']:.0f}{DEG} {self.units} " \
+                f"Low: {day['low']:.0f}{DEG} {self.units}" \
+                f"^pa(+250;+{70 + i*10}){day['conditions']['description'].upper()}"
+            strings.append(line)
+            i += 1
+        return ' '.join(strings)
 
 
 class OpenWeatherMap:
@@ -126,6 +138,9 @@ class OpenWeatherMap:
                     'humidity': hour['main']['humidity'],
                     'pressure': hour['main']['pressure'],
                     'conditions': hour['weather'][0],
-                    'date': hour['dt_txt'],
+                    'date': hour['dt_txt'].split(' ')[0],
                 }
+        d = str(datetime.datetime.now().day)
+        if d in data['days'].keys():
+            del data['days'][d]
         return data
