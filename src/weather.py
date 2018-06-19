@@ -57,22 +57,38 @@ class CityWeather:
 
     def formatWeather(self, output='dzen'):
         d = datetime.datetime.now()
-        date = f"^pa(+50;+200){self.city}{d:%A, %B %d}"
-        temps = f"^pa(+75;+500){self.temp}"
-        return f"{date}{temps}"
+        date = f"{self.city}\n{d:%A, %B %d}"
+        temps = f"{self.temp}"
+        return f"{date}\n{temps}"
 
     def formatForecast(self, output='dzen'):
         strings = []
         i = 0
         for key,day in self.forecast['days'].items():
             d = datetime.datetime.strptime(day['date'], '%Y-%m-%d')
-            line = f"^pa(+250;+{50 + i*10}){d:%A, %b %d}" \
-                f"^pa(+250;+{60 + i*10})High: {day['high']:.0f}{DEG} {self.units} " \
-                f"Low: {day['low']:.0f}{DEG} {self.units}" \
-                f"^pa(+250;+{70 + i*10}){day['conditions']['description'].upper()}"
+            line = f"{d:%A, %b %d}\n" \
+                f"High: {day['high']:.0f}{DEG} {self.units} " \
+                f"Low: {day['low']:.0f}{DEG} {self.units}\n" \
+                f"{day['conditions']['description'].upper()}\n"
             strings.append(line)
             i += 1
-        return ' '.join(strings)
+        return '\n'.join(strings)
+
+    def currentWeatherString(self):
+        d = datetime.datetime.now()
+        date = f"<span font='16'>{self.weather['name']}\n{d.strftime('%A, %B %d')}</span>"
+        temps = f"<span font='24'>{self.temp}</span>"
+        return f"{date}\n{temps}\n"
+
+    def forecastString(self):
+        string = []
+        for key,day in self.forecast['days'].items():
+            temps = f"<span>High: {day['high']}{DEG} - Low: {day['low']}{DEG}</span>"
+            conditions = f"<span>{day['conditions']['description'].upper()}</span>"
+            d = datetime.datetime.strptime(day['date'].split(' ')[0], '%Y-%m-%d')
+            date = f"<span>{d.strftime('%A, %b %d')}</span>"
+            string.append(f"{date}\n{temps}\n{conditions}\n")
+        return '\n'.join(string)
 
 
 class OpenWeatherMap:

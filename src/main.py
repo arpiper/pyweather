@@ -3,6 +3,8 @@ import os
 import argparse
 import requests
 
+import tkinter as tk
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -12,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from weather import OpenWeatherMap
 from weather import CityWeather
-from window import WeatherWindow, WeatherPopup
+from window import WeatherWindow, WeatherPopup, TkWindow
 import config 
 
 DEG = u'\N{DEGREE SIGN}'
@@ -40,8 +42,14 @@ def main(args):
         cw = w.getCurrentWeather()
         print(f"{w.temp} - {w.sunset}")
         title = '^pa(;-150)Weather Forecast'
-        pu = WeatherPopup(f'{title}',f'{w.formatWeather()} {w.formatForecast()}')
-        pu.open()
+        #pu = WeatherPopup(f'{title}',f'{w.formatWeather()} {w.formatForecast()}')
+        #pu.open()
+        tkrt = tk.Tk()
+        tkw = TkWindow(tkrt)
+        tkw.weatherFrame(w.formatWeather())
+        tkw.forecastFrame(w.formatForecast())
+        #tkrt.mainloop()
+        tkw.show()
 
 
 if __name__ == '__main__':

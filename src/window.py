@@ -1,5 +1,8 @@
 import datetime
 from subprocess import run, Popen, check_output, PIPE, STDOUT
+
+import tkinter as tk
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -51,6 +54,55 @@ class WeatherWindow(Gtk.Window):
         d = datetime.datetime.strptime(data['date'].split(' ')[0], '%Y-%m-%d')
         date = f"<span font='{self.FSize}'>{d.strftime('%A, %b %d')}</span>"
         return f"{date}\n{temps}\n{conditions}\n"
+
+
+class TkWindow():
+    root = None
+    window = None
+    width = 500
+    height = 300
+    title = "Tkinter Window"
+
+    def __init__(self, root, **kwargs):
+        self.root = root
+        self.root.title(self.title)
+        self.root.bind('<Key>', self.escapeKey)
+        self.root.bind('<FocusOut>', self.focusOut)
+        #self.root.wm_attributes('-type', 'splash')
+        self.window = tk.Toplevel(self.root)
+        self.window.overrideredirect(1)
+        #self.root.overrideredirect(1)
+        self.root.attributes('-alpha', 0.0)
+        sw = int((root.winfo_screenwidth() / 2) - (self.width / 2))
+        #self.root.geometry(f'{self.width}x{self.height}+{sw}+50')
+        self.root.withdraw()
+        self.window.geometry(f'{self.width}x{self.height}+{sw}+50')
+        self.window.bind('<FocusOut>', self.focusOut)
+        self.window.bind('<Key>', self.escapeKey)
+
+    def show(self):
+        self.window.mainloop()
+
+    def weatherFrame(self, weather):
+        frame = tk.Frame(self.window)
+        label = tk.Label(frame, text=weather)
+        label.pack()
+        frame.pack(side=tk.LEFT)
+
+    def forecastFrame(self, forecast):
+        frame = tk.Frame(self.window)
+        label = tk.Label(frame, text=forecast)
+        label.pack()
+        frame.pack(side=tk.RIGHT)
+
+    def escapeKey(self, event):
+        #if event.keysym == 'Escape' 
+        if event.keycode == 9:
+            self.root.destroy()
+
+    def focusOut(self, event):
+        self.root.destroy()
+
 
 class WeatherPopup():
     font_size = 10 
