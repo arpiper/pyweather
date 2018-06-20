@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from weather import OpenWeatherMap
 from weather import CityWeather
-from window import WeatherWindow, WeatherPopup, TkWindow
+from window import WeatherWindow
 import config 
 
 DEG = u'\N{DEGREE SIGN}'
@@ -37,19 +37,11 @@ def main(args):
         #win.connect('destroy', Gtk.main_quit)
         win.setData(current=cw, forecast=f)
         win.show_all()
-        Gtk.main()
+        win.showWindow()
     else:
         cw = w.getCurrentWeather()
         print(f"{w.temp} - {w.sunset}")
         title = '^pa(;-150)Weather Forecast'
-        #pu = WeatherPopup(f'{title}',f'{w.formatWeather()} {w.formatForecast()}')
-        #pu.open()
-        tkrt = tk.Tk()
-        tkw = TkWindow(tkrt)
-        tkw.weatherFrame(w.formatWeather())
-        tkw.forecastFrame(w.formatForecast())
-        #tkrt.mainloop()
-        tkw.show()
 
 
 if __name__ == '__main__':

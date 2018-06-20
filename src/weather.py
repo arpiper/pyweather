@@ -13,11 +13,13 @@ class CityWeather:
     sunrise = 0
     sunset = 0
     units = 'F'
+    date = None
 
     def __init__(self, city, api, **kwargs):
         # set variables
         self.city = city
         self.api = api
+        self.date = datetime.datetime.now()
         if 'units' in kwargs.keys():
             if kwargs['units'] == 'metric':
                 self.units = 'C'
@@ -56,8 +58,7 @@ class CityWeather:
         self.updateCurrentWeather()
 
     def formatWeather(self, output='dzen'):
-        d = datetime.datetime.now()
-        date = f"{self.city}\n{d:%A, %B %d}"
+        date = f"{self.city}\n{self.date:%A, %B %d}"
         temps = f"{self.temp}"
         return f"{date}\n{temps}"
 
@@ -74,16 +75,15 @@ class CityWeather:
             i += 1
         return '\n'.join(strings)
 
-    def currentWeatherString(self):
-        d = datetime.datetime.now()
-        date = f"<span font='16'>{self.weather['name']}\n{d.strftime('%A, %B %d')}</span>"
+    def gtkWeatherString(self):
+        date = f"<span font='16'>{self.weather['name']}\n{self.date.strftime('%A, %B %d')}</span>"
         temps = f"<span font='24'>{self.temp}</span>"
         return f"{date}\n{temps}\n"
 
-    def forecastString(self):
+    def gtkForecastString(self):
         string = []
         for key,day in self.forecast['days'].items():
-            temps = f"<span>High: {day['high']}{DEG} - Low: {day['low']}{DEG}</span>"
+            temps = f"<span>High: {day['high']:.0f}{DEG} - Low: {day['low']:.0f}{DEG}</span>"
             conditions = f"<span>{day['conditions']['description'].upper()}</span>"
             d = datetime.datetime.strptime(day['date'].split(' ')[0], '%Y-%m-%d')
             date = f"<span>{d.strftime('%A, %b %d')}</span>"
