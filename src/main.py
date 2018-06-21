@@ -30,13 +30,9 @@ def main(args):
     api = OpenWeatherMap(key=config.KEY, city=city, units=units)
     w = CityWeather(city=city, api=api, units=units)
     if args['window']:
-        cw = w.getCurrentWeather()
-        f = w.getForecast()
-        win = WeatherWindow(title=f"{f['city']['name']} Weather Forecast")
-        # mvoed thses two lines into window class.
-        #win.connect('destroy', Gtk.main_quit)
-        win.setData(current=cw, forecast=f)
-        win.show_all()
+        win = WeatherWindow(title=f"{w.city} Weather Forecast")
+        win.setData(current=w.getWeatherStrings(), forecast=w.getForecastStrings())
+        win.drawGrid()
         win.showWindow()
     else:
         cw = w.getCurrentWeather()

@@ -10,8 +10,8 @@ class CityWeather:
     api = None
     weather = None
     forecast = {}
-    sunrise = 0
-    sunset = 0
+    sunrise = {}
+    sunset = {}
     units = 'F'
     date = None
 
@@ -45,13 +45,19 @@ class CityWeather:
             self.weather = weather
             self.temp = f"{int(weather['main']['temp'])}{DEG} {self.units}"
             s = datetime.datetime.fromtimestamp(weather['sys']['sunrise'])
-            self.sunrise = f'{s.hour}:{s.minute}'
+            self.sunrise = {
+                'hm': f'{s.hour}:{s.minute}',
+                'utc': weather['sys']['sunrise'],
+            }
             if s.minute < 10:
-                self.sunrise = f'{s.hour}:0{s.minute}'
+                self.sunrise['hm'] = f'{s.hour}:0{s.minute}'
             s = datetime.datetime.fromtimestamp(weather['sys']['sunset'])
-            self.sunset = f'{s.hour}:{s.minute}'
+            self.sunset = {
+                'hm': f'{s.hour}:{s.minute}',
+                'utc': weather['sys']['sunset'],
+            }
             if s.minute < 10:
-                self.sunset = f'{s.hour}:0{s.minute}'
+                self.sunset['hm'] = f'{s.hour}:0{s.minute}'
 
     def updateData(self):
         self.updateForecast()
@@ -75,20 +81,28 @@ class CityWeather:
             i += 1
         return '\n'.join(strings)
 
-    def gtkWeatherString(self):
-        date = f"<span font='16'>{self.weather['name']}\n{self.date.strftime('%A, %B %d')}</span>"
-        temps = f"<span font='24'>{self.temp}</span>"
-        return f"{date}\n{temps}\n"
+    def getWeatherStrings(self):
+        strings = {
+            'city': self.city,
+            'date': self.date.strftime('%a, %b %d'),
+            'temp': self.temp,
+        }
+        if self.date.timestamp() < self.sunset['utc']:
+            strings['sun'] = self.sunset['hm']
+        else:
+            strings['sun'] = self.sunrise['hm']
+        return strings
 
-    def gtkForecastString(self):
-        string = []
+    def getForecastStrings(self):
+        strings = {}
         for key,day in self.forecast['days'].items():
-            temps = f"<span>High: {day['high']:.0f}{DEG} - Low: {day['low']:.0f}{DEG}</span>"
-            conditions = f"<span>{day['conditions']['description'].upper()}</span>"
             d = datetime.datetime.strptime(day['date'].split(' ')[0], '%Y-%m-%d')
-            date = f"<span>{d.strftime('%A, %b %d')}</span>"
-            string.append(f"{date}\n{temps}\n{conditions}\n")
-        return '\n'.join(string)
+            strings[d.day] = {
+                'date': d.strftime('%A - %d'),
+                'temps': f"High: {day['high']:.0f}{DEG} {self.units} - Low: {day['low']:.0f}{DEG} {self.units}",
+                'cond': day['conditions']['description'].upper(),
+            }
+        return strings
 
 
 class OpenWeatherMap:

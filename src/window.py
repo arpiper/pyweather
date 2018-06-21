@@ -9,14 +9,22 @@ DEG = u'\N{DEGREE SIGN}'
 class WeatherWindow(Gtk.Window):
     FSize = 8
     WSize = 24
+    width = 500
+    height = 200
+    forecast = None
+    current = None
     
-    def __init__(self, title='hello'):
+    def __init__(self, title='hello', **kwargs):
         super().__init__(title=title)
-        self.set_default_size(width=400, height=200)
-        self.set_position(Gtk.WindowPosition.CENTER)
+        dims = Gdk.Display().get_default().get_monitor(0).get_geometry()
+        if 'width' in kwargs.keys():
+            self.width = kwargs['width']
+        if 'height' in kwargs.keys():
+            self.height = kwargs['height']
+        self.set_default_size(width=self.width, height=self.height)
+        self.move((dims.width / 2) - (self.width / 2), 40)
         self.set_has_resize_grip(False)
         self.set_decorated(False)
-        Gtk.Widget.set_opacity(self, 0.5)
         self.connect('destroy', Gtk.main_quit)       
 
     # close the window with the escape key
@@ -29,9 +37,45 @@ class WeatherWindow(Gtk.Window):
         Gtk.main_quit()
 
     def showWindow(self):
+        self.show_all()
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        Gtk.Widget.set_opacity(self, 0.95)
         Gtk.main()
 
+    def closeWindow(self):
+        Gtk.main_quit()
+
+    def drawGrid(self):
+        grid = Gtk.Grid()
+        self.add(grid)
+
+        # current weather
+        city = Gtk.Label(self.current['city'], expand=True)
+        city.set_justify(Gtk.Justification.LEFT)
+        day = Gtk.Label(self.current['date'], expand=True)
+        day.set_justify(Gtk.Justification.RIGHT)
+        temp = Gtk.Label(self.current['temp'], expand=True)
+        sun = Gtk.Label(self.current['sun'], expand=True)
+
+        grid.add(city)
+        grid.attach(day, 1, 0, 1, 1)
+        grid.attach(temp, 0, 1, 2, 1)
+        grid.attach(sun, 0, 2, 2, 1)
+
+        i = 0
+        for d, day in self.forecast.items():
+            forecast = Gtk.Label(expand=True, fill=True)
+            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span>")
+            forecast.set_justify(Gtk.Justification.LEFT)
+            grid.attach(forecast, 2, i, 1, 1) 
+            i += 1
+
+
     def setData(self, current, forecast):
+        self.current = current
+        self.forecast = forecast
+
+    def drawBox(self):
         box = Gtk.Box(spacing=5)
         wbox = Gtk.Box()
         wbox.set_homogeneous(False)
@@ -40,11 +84,11 @@ class WeatherWindow(Gtk.Window):
         box.pack_start(fbox, True, True, 0)
 
         label = Gtk.Label()
-        label.set_markup(self.currentWeatherString(current))
+        label.set_markup(self.currentWeatherString(self.current))
         label.set_justify(Gtk.Justification.CENTER)
         wbox.pack_start(label, True, True, 0)
 
-        for d,day in forecast['days'].items():
+        for d,day in self.forecast.items():
             label = Gtk.Label()
             label.set_markup(self.forecastString(day))
             label.set_justify(Gtk.Justification.LEFT)
@@ -53,15 +97,18 @@ class WeatherWindow(Gtk.Window):
         self.add(box)
 
     def currentWeatherString(self, data):
-        d = datetime.datetime.now()
-        date = f"<span font='16'>{data['name']}\n{d.strftime('%A, %B %d')}</span>"
-        temps = f"<span font='{self.WSize}'>{data['main']['temp']}{DEG} C</span>"
-        return f"{date}\n{temps}\n"
+        city = f"<span font='18'>{data['city']}</span>"
+        date = f"<span font='18'>{data['date']}</span>"
+        temps = f"<span font='{self.WSize}'>{data['temp']}</span>"
+        sun = f"<span font='14'>{data['sun']}</span>"
+        top = f"<span>{city}{date}</span>"
+        bottom = f"<span>{temps}{sun}</span>"
+        #return f"{city}\n{date}\n{temps}\n{sun}"
+        return f"{top}\n\n{bottom}"
 
     def forecastString(self, data):
-        temps = f"<span font='{self.FSize}'>High: {data['high']}{DEG} - Low: {data['low']}{DEG}</span>"
-        conditions = f"<span font='{self.FSize}'>{data['conditions']['description'].upper()}</span>"
-        d = datetime.datetime.strptime(data['date'].split(' ')[0], '%Y-%m-%d')
-        date = f"<span font='{self.FSize}'>{d.strftime('%A, %b %d')}</span>"
+        temps = f"<span font='12'>{data['temps']}</span>"
+        conditions = f"<span font='10'>{data['cond']}</span>"
+        date = f"<span font='{self.FSize}'>{data['date']}</span>"
         return f"{date}\n{temps}\n{conditions}\n"
 
