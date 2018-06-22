@@ -64,7 +64,7 @@ class WeatherWindow(Gtk.Window):
 
         i = 0
         for d, day in self.forecast.items():
-            forecast = Gtk.Label(expand=True, fill=True)
+            forecast = Gtk.Label(expand=True)
             forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span>")
             forecast.set_justify(Gtk.Justification.LEFT)
             grid.attach(forecast, 2, i, 1, 1) 
