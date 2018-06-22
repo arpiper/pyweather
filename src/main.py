@@ -3,12 +3,6 @@ import os
 import argparse
 import requests
 
-import tkinter as tk
-
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
 # set path to the local directory
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -36,7 +30,7 @@ def main(args):
         win.showWindow()
     else:
         cw = w.getCurrentWeather()
-        print(f"{w.temp} - {w.sunset}")
+        print(f"{w.temp} - {w.sunset['hm']}")
         title = '^pa(;-150)Weather Forecast'
 
 
