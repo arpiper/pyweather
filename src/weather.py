@@ -1,6 +1,7 @@
 import requests
 import sys
 import datetime
+import fontawesome as fa
 
 DEG = u'\N{DEGREE SIGN}'
 
@@ -101,6 +102,7 @@ class CityWeather:
                 'date': d.strftime('%A - %d'),
                 'temps': f"High: {day['high']:.0f}{DEG} {self.units} - Low: {day['low']:.0f}{DEG} {self.units}",
                 'cond': day['conditions']['description'].upper(),
+                'icon': day['icon'],
             }
         return strings
 
@@ -169,8 +171,14 @@ class OpenWeatherMap:
                     'pressure': hour['main']['pressure'],
                     'conditions': hour['weather'][0],
                     'date': hour['dt_txt'].split(' ')[0],
+                    'icon': self.getIcon(hour['weather'][0]['icon']),
                 }
         d = str(datetime.datetime.now().day)
         if d in data['days'].keys():
             del data['days'][d]
         return data
+
+    def getIcon(self, icon_id):
+        return {
+            '01d': fa.icons['sun-o'],
+        }.get(icon_id, fa.icons['sun-o'])

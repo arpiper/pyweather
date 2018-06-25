@@ -81,7 +81,7 @@ class WeatherWindow(Gtk.Window):
         i = 0
         for d, day in self.forecast.items():
             forecast = Gtk.Label(expand=True, valign=Gtk.Align.CENTER)
-            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span>")
+            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span><span font='{b}'>{day['icon']}</span>")
             forecast.set_justify(Gtk.Justification.LEFT)
             Gtk.Widget.set_halign(forecast, Gtk.Align.START)
             #Gtk.Widget.set_valign(forecast, Gtk.Align.BASELINE)
