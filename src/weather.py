@@ -4,6 +4,27 @@ import datetime
 import fontawesome as fa
 
 DEG = u'\N{DEGREE SIGN}'
+ICON = {
+    '01d': u"\uf00d",
+    '01n': u"\uf02e",
+    '02d': u"\uf00c",
+    '02n': u"\uf083",
+    '03d': u"\uf041",
+    '03n': u"\uf041",
+    '04d': u"\uf013",
+    '04n': u"\uf013",
+    '09d': u"\uf019",
+    '09n': u"\uf019",
+    '10d': u"\uf008",
+    '10n': u"\uf028",
+    '11d': u"\uf01e",
+    '11n': u"\uf01e",
+    '13d': u"\uf01b",
+    '13n': u"\uf01b",
+    '50d': u"\uf014",
+    '50n': u"\uf014",
+}
+
 
 class CityWeather:
     city = None
@@ -72,7 +93,7 @@ class CityWeather:
     def formatForecast(self, output='dzen'):
         strings = []
         i = 0
-        for key,day in self.forecast['days'].items():
+        for key, day in self.forecast['days'].items():
             d = datetime.datetime.strptime(day['date'], '%Y-%m-%d')
             line = f"{d:%A, %b %d}\n" \
                 f"High: {day['high']:.0f}{DEG} {self.units} " \
@@ -171,14 +192,11 @@ class OpenWeatherMap:
                     'pressure': hour['main']['pressure'],
                     'conditions': hour['weather'][0],
                     'date': hour['dt_txt'].split(' ')[0],
-                    'icon': self.getIcon(hour['weather'][0]['icon']),
+                    'icon': ICON[hour['weather'][0]['icon']],
                 }
         d = str(datetime.datetime.now().day)
         if d in data['days'].keys():
             del data['days'][d]
+        data['days'] = {k:data['days'][k] for k in data['days'] if int(k) > int(d) and int(k) <= int(d)+3}
         return data
 
-    def getIcon(self, icon_id):
-        return {
-            '01d': fa.icons['sun-o'],
-        }.get(icon_id, fa.icons['sun-o'])
