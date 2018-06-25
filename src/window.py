@@ -58,36 +58,54 @@ class WeatherWindow(Gtk.Window):
 
         self.add(grid)
 
-        # current weather
+        # city and date
         city = Gtk.Label(self.current['city'], expand=True)
         city.set_justify(Gtk.Justification.LEFT)
         day = Gtk.Label(expand=True)
         day.set_markup(f"<span bgcolor='#003300'>{self.current['date']}</span>")
         Gtk.Widget.set_halign(day, Gtk.Align.FILL)
         day.set_justify(Gtk.Justification.RIGHT)
+
+        # current weather
         temp = Gtk.Label(expand=True)
         Gtk.Widget.set_halign(temp, Gtk.Align.FILL)
         Gtk.Widget.set_valign(temp, Gtk.Align.FILL)
         temp.set_markup(f"<span bgcolor='#000021' font='{b}'>{self.current['temp']}</span>")
         Gtk.Widget.set_hexpand(temp, True)
+
+        # sunset/sunrise
+        sun_icon = Gtk.Label()
+        sun_icon.set_markup(f"<span font_family='Weather Icons' font='20'>\uf052</span>")
+        sun_icon.set_padding(5, 0)
+        Gtk.Widget.set_halign(sun_icon, Gtk.Align.END)
         sun = Gtk.Label(expand=True)
         sun.set_markup(f"<span font='{m2}'>{self.current['sun']}</span>")
+        sun.set_padding(5, 0)
+        Gtk.Widget.set_halign(sun, Gtk.Align.START)
 
         grid.add(city)
         grid.attach(day, 1, 0, 1, 1)
         grid.attach(temp, 0, 1, 2, 1)
-        grid.attach(sun, 0, 2, 2, 1)
+        grid.attach(sun_icon, 0, 2, 1, 1)
+        grid.attach(sun, 1, 2, 1, 1)
 
         i = 0
         for d, day in self.forecast.items():
-            forecast = Gtk.Label(expand=True, valign=Gtk.Align.CENTER)
-            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span><span font='{b}'>{day['icon']}</span>")
+            icon = Gtk.Label(yalign=0.5)#valign=Gtk.Align.CENTER)
+            icon.set_markup(f"<span font_family='Weather Icons' font='20'>{day['icon']}</span>")
+            icon.set_padding(5, 0)
+            Gtk.Widget.set_halign(icon, Gtk.Align.START)
+            forecast = Gtk.Label(expand=True )# valign=Gtk.Align.CENTER, halign=Gtk.Align.START)
+            #forecast.set_ellipsize(True)
+            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span>")
             forecast.set_justify(Gtk.Justification.LEFT)
-            Gtk.Widget.set_halign(forecast, Gtk.Align.START)
-            #Gtk.Widget.set_valign(forecast, Gtk.Align.BASELINE)
-            grid.attach(forecast, 2, i, 1, 1) 
+            forecast.set_xalign(0)
+            forecast.set_yalign(1)
+            #Gtk.Widget.set_halign(forecast, Gtk.Align.START)
+            Gtk.Widget.set_valign(forecast, Gtk.Align.CENTER)
+            grid.attach(icon, 2, i, 1, 1) 
+            grid.attach(forecast, 3, i, 1, 1) 
             i += 1
-
 
     def setData(self, current, forecast):
         self.current = current
