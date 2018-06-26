@@ -30,7 +30,7 @@ def main(args):
         win.showWindow()
     else:
         cw = w.getCurrentWeather()
-        print(f"{w.temp} - {w.sunset['hm']}")
+        print(f"{w.temp} - \uf051 {w.sunset['hm']}")
         title = '^pa(;-150)Weather Forecast'
 
 
