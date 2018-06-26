@@ -1,7 +1,7 @@
 import requests
 import sys
 import datetime
-import fontawesome as fa
+#import fontawesome as fa
 
 DEG = u'\N{DEGREE SIGN}'
 ICON = {
@@ -104,10 +104,12 @@ class CityWeather:
         return '\n'.join(strings)
 
     def getWeatherStrings(self):
+        print(self.weather)
         strings = {
             'city': self.city,
             'date': self.date.strftime('%a, %b %d'),
             'temp': self.temp,
+            'cond': self.weather['weather']['description'].upper(),
         }
         if self.date.timestamp() < self.sunset['utc']:
             strings['sun'] = self.sunset['hm']
@@ -167,8 +169,10 @@ class OpenWeatherMap:
         res = requests.get(self.weather())
         data = {}
         for key,value in res.json().items():
-            if key in ['weather', 'main', 'id', 'wind', 'name', 'coord', 'sys']:
+            if key in ['main', 'id', 'wind', 'name', 'coord', 'sys']:
                 data[key] = value
+            if key == 'weather':
+                data[key] = value[0]
         return data
 
     def getForecast(self):
