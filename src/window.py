@@ -9,8 +9,8 @@ DEG = u'\N{DEGREE SIGN}'
 class WeatherWindow(Gtk.Window):
     font_sma = 8
     font_med1 = 12
-    font_med2 = 16
-    font_big = 24
+    font_med2 = 14
+    font_big = 26
     width = 500
     height = 200
     forecast = None
@@ -38,6 +38,10 @@ class WeatherWindow(Gtk.Window):
     def do_focus_out_event(self, event):
         Gtk.main_quit()
 
+    # close the window when user clicks it.
+    def do_button_press_event(self, event):
+        Gtk.main_quit()
+
     def showWindow(self):
         self.show_all()
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
@@ -52,59 +56,44 @@ class WeatherWindow(Gtk.Window):
         m1 = self.font_med1
         m2 = self.font_med2
         b = self.font_big
-        grid = Gtk.Grid()
-        Gtk.Widget.set_halign(grid, Gtk.Align.FILL)
-        Gtk.Widget.set_valign(grid, Gtk.Align.FILL)
 
+        grid = Gtk.Grid()
         self.add(grid)
 
         # city and date
-        city = Gtk.Label(self.current['city'], expand=True)
-        city.set_justify(Gtk.Justification.LEFT)
-        day = Gtk.Label(expand=True)
-        day.set_markup(f"<span bgcolor='#003300'>{self.current['date']}</span>")
-        Gtk.Widget.set_halign(day, Gtk.Align.FILL)
-        day.set_justify(Gtk.Justification.RIGHT)
+        info_string = f"<span font='{m2}'>{self.current['date']}</span>\n" \
+            f"<span font='{m2}'>{self.current['city']}</span>"
+        info = Gtk.Label(expand=True, xalign=0.1, margin_left=10)
+        info.set_markup(info_string)
 
-        # current weather
-        temp = Gtk.Label(expand=True)
-        Gtk.Widget.set_halign(temp, Gtk.Align.FILL)
-        Gtk.Widget.set_valign(temp, Gtk.Align.FILL)
-        temp.set_markup(f"<span bgcolor='#000021' font='{b}'>{self.current['temp']}</span>")
-        Gtk.Widget.set_hexpand(temp, True)
+        # current weather conditionsa and  sunset/sunrise
+        ws = f"<span font='{b}'>{self.current['temp']}</span>\n" \
+            f"<span font='10'>{self.current['cond']}</span>\n" \
+            f"<span font_family='Weather Icons' font='10'>\uf052</span>" \
+            f"<span font='10'> {self.current['sun']}</span>"
+        weather = Gtk.Label(expand=True, xalign=0.5, yalign=0.5)
+        weather.set_markup(ws)
 
-        # sunset/sunrise
-        sun_icon = Gtk.Label()
-        sun_icon.set_markup(f"<span font_family='Weather Icons' font='20'>\uf052</span>")
-        sun_icon.set_padding(5, 0)
-        Gtk.Widget.set_halign(sun_icon, Gtk.Align.END)
-        sun = Gtk.Label(expand=True)
-        sun.set_markup(f"<span font='{m2}'>{self.current['sun']}</span>")
-        sun.set_padding(5, 0)
-        Gtk.Widget.set_halign(sun, Gtk.Align.START)
+        grid.attach(info, 0, 0, 1, 4)
+        grid.attach(weather, 1, 0, 1, 4)
 
-        grid.add(city)
-        grid.attach(day, 1, 0, 1, 1)
-        grid.attach(temp, 0, 1, 2, 1)
-        grid.attach(sun_icon, 0, 2, 1, 1)
-        grid.attach(sun, 1, 2, 1, 1)
-
+        # 3 day forecast 
         i = 0
         for d, day in self.forecast.items():
-            icon = Gtk.Label(yalign=0.5)#valign=Gtk.Align.CENTER)
-            icon.set_markup(f"<span font_family='Weather Icons' font='20'>{day['icon']}</span>")
-            icon.set_padding(5, 0)
-            Gtk.Widget.set_halign(icon, Gtk.Align.START)
-            forecast = Gtk.Label(expand=True )# valign=Gtk.Align.CENTER, halign=Gtk.Align.START)
-            #forecast.set_ellipsize(True)
-            forecast.set_markup(f"<span bgcolor='#{i}{i}0000'>{self.forecastString(day)}</span>")
-            forecast.set_justify(Gtk.Justification.LEFT)
-            forecast.set_xalign(0)
-            forecast.set_yalign(1)
-            #Gtk.Widget.set_halign(forecast, Gtk.Align.START)
-            Gtk.Widget.set_valign(forecast, Gtk.Align.CENTER)
-            grid.attach(icon, 2, i, 1, 1) 
-            grid.attach(forecast, 3, i, 1, 1) 
+            container = Gtk.Grid(expand=True, valign=Gtk.Align.CENTER, margin_top=5, margin_bottom=5)
+            ic = Gtk.Label(valign=Gtk.Align.CENTER, expand=True) 
+            ic.set_markup(f"<span font_family='Weather Icons' font='20'>{day['icon']}</span>")
+            da = Gtk.Label(expand=True, halign=Gtk.Align.START)#, xalign=0)
+            da.set_markup(f"<span font='8'>{day['date']}</span>")
+            te = Gtk.Label(expand=True,halign=Gtk.Align.START)#  xalign=0)
+            te.set_markup(f"<span font='12'>{day['temps']}</span>")
+            co = Gtk.Label(expand=True,halign=Gtk.Align.START)# xalign=0)
+            co.set_markup(f"<span font='10'>{day['cond']}</span>")
+            container.attach(ic, 0, 0, 1, 3)
+            container.attach(da, 1, 0, 2, 1)
+            container.attach(te, 1, 1, 2, 1)
+            container.attach(co, 1, 2, 2, 1)
+            grid.attach(container, 2, i, 2, 1)
             i += 1
 
     def setData(self, current, forecast):
@@ -135,7 +124,7 @@ class WeatherWindow(Gtk.Window):
     def currentWeatherString(self, data):
         city = f"<span font='18'>{data['city']}</span>"
         date = f"<span font='18'>{data['date']}</span>"
-        temps = f"<span font='{self.WSize}'>{data['temp']}</span>"
+        temps = f"<span font='{self.font_big}'>{data['temp']}</span>"
         sun = f"<span font='14'>{data['sun']}</span>"
         top = f"<span>{city}{date}</span>"
         bottom = f"<span>{temps}{sun}</span>"
