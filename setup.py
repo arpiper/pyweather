@@ -4,7 +4,7 @@ with open('README.md', 'r') as rd:
     long_desc = rd.read()
 
 setup(
-    name='pyweather',
+    name='pyweatherarp',
     version='0.1',
     description='Simple weather checking tool for toolbar output',
     long_description=long_desc,
@@ -13,8 +13,14 @@ setup(
     author='Andrew Piper',
     author_email='dev@arpiper.com',
     packages=['pyweatherarp'],
+    entry_points={
+        'console_scripts': [
+            'pyweatherarp = pyweatherarp.__main__:main',
+        ],
+    },
     classifiers=(
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX :: Linux',
+    ),
 )

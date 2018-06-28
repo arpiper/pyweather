@@ -104,7 +104,6 @@ class CityWeather:
         return '\n'.join(strings)
 
     def getWeatherStrings(self):
-        print(self.weather)
         strings = {
             'city': self.city,
             'date': self.date.strftime('%a, %b %d'),

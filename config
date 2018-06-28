@@ -1,0 +1,11 @@
+# weather source and api key
+[API]
+URL = openweathermap.org
+#key = openweather api key
+
+# Weather settings
+[SETTINGS]
+UNITS = metric
+CITY = Seattle
+COUNTRY = USA
+UPDATE_INTERVAL = 900
