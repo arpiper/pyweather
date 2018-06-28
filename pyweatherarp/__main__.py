@@ -6,7 +6,7 @@ import configparser
 from xdg.BaseDirectory import *
 
 # set path to the local directory
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from weather import OpenWeatherMap
 from weather import CityWeather
