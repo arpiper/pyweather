@@ -3,20 +3,23 @@ import os
 import argparse
 import requests
 import configparser
+import datetime
 from xdg.BaseDirectory import *
 
 # set path to the local directory
 #sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from weather import OpenWeatherMap
-from weather import CityWeather
-from window import WeatherWindow
+from pyweatherarp.weather import OpenWeatherMap
+from pyweatherarp.weather import CityWeather
+from pyweatherarp.window import WeatherWindow
 
 def main():
     # parse any command line arguments
     ap = argparse.ArgumentParser()
     ap.add_argument('-w', '--window', action='store_true', help='Show weather data in a popup window')
-    ap.add_argument('-l', '--cli', action='store_true', help='Print Current weather conditions. Default output mode.')
+    ap.add_argument('-s', '--short', action='store_true', help='Current weather conditions. Default output mode')
+    ap.add_argument('-l', '--long', action='store_true', help='Current weather in long form')
+    ap.add_argument('-f', '--forecast', action='store_true', help='Weather forecast with conditions')
     ap.add_argument('-C', '--city', help='City name or id')
     ap.add_argument('-u', '--units', help='Temperature units: metric | imperial')
     ap.add_argument('-bg', '--background', help='background color of the popup window')
@@ -36,6 +39,7 @@ def main():
     units = config['SETTINGS']['UNITS']
     key = config['API']['key']
 
+    now = datetime.datetime.now()
     if args['city']:
         city = args['city']
     if args['units']:
@@ -48,10 +52,15 @@ def main():
         win.setData(current=w.getWeatherStrings(), forecast=w.getForecastStrings())
         win.drawGrid()
         win.showWindow()
+    elif args['long']:
+        print(w.parseWeatherStrings())
+    elif args['forecast']: 
+        print(w.parseForecastStrings())
     else:
-        cw = w.getCurrentWeather()
-        print(f"{w.temp} - \uf051 {w.sunset['hm']}")
-        title = '^pa(;-150)Weather Forecast'
+        if now.timestamp() < w.sunset['utc']:
+            print(f"{w.temp}\t{w.sunset['icon']}{w.sunset['hm']}")
+        else:
+            print(f"{w.temp}\t{w.sunrise['icon']}{w.sunrise['hm']}")
 
 
 if __name__ == '__main__':

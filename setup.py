@@ -5,7 +5,7 @@ with open('README.md', 'r') as rd:
 
 setup(
     name='pyweatherarp',
-    version='0.1',
+    version='1.0',
     description='Simple weather checking tool for toolbar output',
     long_description=long_desc,
     long_description_content_type='text/markdown',

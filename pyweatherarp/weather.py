@@ -4,26 +4,29 @@ import datetime
 #import fontawesome as fa
 
 DEG = u'\N{DEGREE SIGN}'
+# FuraCode Nerd Font weather icons
 ICON = {
-    '01d': u"\uf00d",
-    '01n': u"\uf02e",
-    '02d': u"\uf00c",
-    '02n': u"\uf083",
-    '03d': u"\uf041",
-    '03n': u"\uf041",
-    '04d': u"\uf013",
-    '04n': u"\uf013",
-    '09d': u"\uf019",
-    '09n': u"\uf019",
-    '10d': u"\uf008",
-    '10n': u"\uf028",
-    '11d': u"\uf01e",
-    '11n': u"\uf01e",
-    '13d': u"\uf01b",
-    '13n': u"\uf01b",
-    '50d': u"\uf014",
-    '50n': u"\uf014",
+    '01d': " ", #u"\uf00d",
+    '01n': " ", #u"\uf02e",
+    '02d': " ", #u"\uf00c",
+    '02n': " ", #u"\uf083",
+    '03d': " ", #u"\uf041",
+    '03n': " ", #u"\uf041",
+    '04d': " ", #u"\uf013",
+    '04n': " ", #u"\uf013",
+    '09d': " ", #u"\uf019",
+    '09n': " ", #u"\uf019",
+    '10d': " ", #u"\uf008",
+    '10n': " ", #u"\uf028",
+    '11d': " ", #u"\uf01e",
+    '11n': " ", #u"\uf01e",
+    '13d': " ", #u"\uf01b",
+    '13n': " ", #u"\uf01b",
+    '50d': " ", #u"\uf014",
+    '50n': " ", #u"\uf014",
 }
+SUNSET = " "
+SUNRISE = " "
 
 
 class CityWeather:
@@ -65,11 +68,12 @@ class CityWeather:
         weather = self.api.getWeather()
         if len(weather) > 0:
             self.weather = weather
-            self.temp = f"{int(weather['main']['temp'])}{DEG} {self.units}"
+            self.temp = f"{ICON[weather['weather']['icon']]} {int(weather['main']['temp'])}{DEG} {self.units}"
             s = datetime.datetime.fromtimestamp(weather['sys']['sunrise'])
             self.sunrise = {
                 'hm': f'{s.hour}:{s.minute}',
                 'utc': weather['sys']['sunrise'],
+                'icon': SUNRISE,
             }
             if s.minute < 10:
                 self.sunrise['hm'] = f'{s.hour}:0{s.minute}'
@@ -77,6 +81,7 @@ class CityWeather:
             self.sunset = {
                 'hm': f'{s.hour}:{s.minute}',
                 'utc': weather['sys']['sunset'],
+                'icon': SUNSET,
             }
             if s.minute < 10:
                 self.sunset['hm'] = f'{s.hour}:0{s.minute}'
@@ -111,9 +116,9 @@ class CityWeather:
             'cond': self.weather['weather']['description'].upper(),
         }
         if self.date.timestamp() < self.sunset['utc']:
-            strings['sun'] = self.sunset['hm']
+            strings['sun'] = f"Sunset: {self.sunset['hm']}"
         else:
-            strings['sun'] = self.sunrise['hm']
+            strings['sun'] = f"Sunrise: {self.sunrise['hm']}"
         return strings
 
     def getForecastStrings(self):
@@ -121,12 +126,32 @@ class CityWeather:
         for key,day in self.forecast['days'].items():
             d = datetime.datetime.strptime(day['date'].split(' ')[0], '%Y-%m-%d')
             strings[d.day] = {
-                'date': d.strftime('%A - %d'),
+                'date': d.strftime('%a - %d'),
                 'temps': f"High: {day['high']:.0f}{DEG} {self.units} - Low: {day['low']:.0f}{DEG} {self.units}",
                 'cond': day['conditions']['description'].upper(),
                 'icon': day['icon'],
             }
         return strings
+
+    def parseWeatherStrings(self):
+        s = self.getWeatherStrings()
+        a = f"{s['city']} - {s['date']}"
+        b = f"{s['temp']}"
+        c = f"{s['cond']}"
+        d = f"{s['sun']}"
+        b = ' ' * int(len(a) / 2 - len(b) / 2) + b
+        c = ' ' * int(len(a) / 2 - len(c) / 2) + c
+        d = ' ' * int(len(a) / 2 - len(d) / 2) + d
+        return f"{a}\n{b}\n{c}\n{d}\n"
+
+
+    def parseForecastStrings(self):
+        f = self.getForecastStrings()
+        s = ""
+        for key, day in f.items():
+            s += f"{day['date']} - {day['icon']} {day['cond']} {day['temps']}\n"
+        return s
+
 
 
 class OpenWeatherMap:
