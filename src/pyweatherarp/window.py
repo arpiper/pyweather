@@ -17,8 +17,11 @@ class WeatherWindow(Gtk.Window):
     current = None
     
     def __init__(self, title='hello', **kwargs):
+        print('before suer')
         super().__init__(title=title)
         dims = Gdk.Display().get_default().get_monitor(0).get_geometry()
+        print('dims')
+        print(dims)
         if 'width' in kwargs.keys():
             self.width = kwargs['width']
         if 'height' in kwargs.keys():
@@ -97,6 +100,7 @@ class WeatherWindow(Gtk.Window):
             i += 1
 
     def setData(self, current, forecast):
+        print('setData', self)
         self.current = current
         self.forecast = forecast
 
